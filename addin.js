@@ -1,5 +1,5 @@
 /**
- * Traxxis Add-in Suite Dashboard
+ * Traxxis Add-in Suite Dashboard ---
  * @returns {{initialize: Function, focus: Function, blur: Function}}
  */
 geotab.addin.traxxisDashboard = function () {
