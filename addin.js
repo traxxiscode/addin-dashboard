@@ -16,7 +16,7 @@ geotab.addin.traxxisDashboard = function () {
             name: 'HOS Availability Alert Emailer',
             description: 'Automated Hours-of-Service limit notifications. Alerts recipients when drivers are approaching their driving, duty, rest, or weekly cycle limits.',
             icon: 'fas fa-clock',
-            url: 'https://YOUR_ORG.github.io/hos-alerter/',  // ← replace with real URL
+            url: 'https://traxxiscode.github.io/hos-alerter-frontend/index.html',  // ← replace with real URL
             category: 'Compliance'
         }
         // Future add-ins go here:
