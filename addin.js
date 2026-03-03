@@ -44,12 +44,12 @@ geotab.addin.traxxisDashboard = function () {
     }
 
     function hideInitialLoading() {
-        const el = document.getElementById('initialLoadingOverlay');
+        const el = document.getElementById('suiteLoadingOverlay');
         if (el) el.style.display = 'none';
     }
 
     function showInitialLoading() {
-        const el = document.getElementById('initialLoadingOverlay');
+        const el = document.getElementById('suiteLoadingOverlay');
         if (el) el.style.display = 'flex';
     }
 
