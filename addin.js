@@ -66,21 +66,26 @@ geotab.addin.traxxisDashboard = function () {
     // ── Cleanup previously injected add-in assets ──────────────────────────────
 
     function cleanupActiveAddin() {
-        // Call blur on the active add-in if it has one
         if (activeAddin && typeof activeAddin.blur === 'function') {
             try { activeAddin.blur(); } catch (e) { console.warn('blur() error:', e); }
         }
         activeAddin = null;
 
-        // Remove injected <link> tags
         injectedStyles.forEach(el => { if (el && el.parentNode) el.parentNode.removeChild(el); });
         injectedStyles = [];
 
-        // Remove injected <script> tags
-        injectedScripts.forEach(el => { if (el && el.parentNode) el.parentNode.removeChild(el); });
-        injectedScripts = [];
+        // Only remove non-Firebase scripts
+        injectedScripts = injectedScripts.filter(el => {
+            const src = el.src || '';
+            const isFirebase = src.includes('firebase') || 
+                            (el.textContent && el.textContent.includes('firebase'));
+            if (!isFirebase && el.parentNode) {
+                el.parentNode.removeChild(el);
+                return false;
+            }
+            return true; // keep Firebase scripts in DOM
+        });
 
-        // Clear the addin mount container
         const container = document.getElementById('addinMountContainer');
         if (container) container.innerHTML = '';
     }
@@ -152,7 +157,10 @@ geotab.addin.traxxisDashboard = function () {
                     document.head.appendChild(el);
                     injectedScripts.push(el);
                 } else if (script.textContent.trim()) {
-                    // Inline script (e.g. firebase.initializeApp)
+                    // Skip if Firebase is already initialized
+                    if (script.textContent.includes('firebase') && window.db) {
+                        resolve(); return;
+                    }
                     const el = document.createElement('script');
                     el.textContent = script.textContent;
                     document.head.appendChild(el);
