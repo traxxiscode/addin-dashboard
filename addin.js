@@ -26,6 +26,19 @@ geotab.addin.traxxisDashboard = function () {
             htmlUrl: 'https://traxxiscode.github.io/hos-alerter-frontend/index.html',
             jsUrl:   'https://traxxiscode.github.io/hos-alerter-frontend/addin.js',
             cssUrl:  'https://traxxiscode.github.io/hos-alerter-frontend/addin.css'
+        },
+        {
+            id: 'device_manager',
+            name: 'Digital Matter Device Manager',
+            description: 'Manage and configure your Digital Matter devices directly from MyGeotab.',
+            icon: 'fas fa-cogs',
+            category: 'Device Management',
+            geotabKey: 'digitalMatterDeviceManager',
+            rootElementId: 'digitalMatterDeviceManager',
+            baseUrl: 'https://traxxiscode.github.io/DigitalMatter-DeviceManager/public/',
+            htmlUrl: 'https://traxxiscode.github.io/DigitalMatter-DeviceManager/public/index.html',
+            jsUrl:   'https://traxxiscode.github.io/DigitalMatter-DeviceManager/public/addin.js',
+            cssUrl:  'https://traxxiscode.github.io/DigitalMatter-DeviceManager/public/addin.css'
         }
         // Future add-ins:
         // { id: 'dvir_emailer', name: 'DVIR Emailer', geotabKey: 'dvirEmailer', rootElementId: 'dvirEmailer', ... }
@@ -33,7 +46,7 @@ geotab.addin.traxxisDashboard = function () {
 
     // ── Database Access Control ────────────────────────────────────────────────
     const DATABASE_ACCESS = {
-        'traxxisdemo': ['hos_alerter'],
+        'traxxisdemo': ['hos_alerter', 'device_manager'],
         // 'another_db': ['hos_alerter', 'dvir_emailer'],
     };
 
