@@ -119,19 +119,50 @@ geotab.addin.traxxisDashboard = function () {
         if (!response.ok) throw new Error('Failed to fetch HTML: ' + addin.htmlUrl);
         const html = await response.text();
 
-        // Parse the fetched HTML and extract the add-in's root element
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
         const rootEl = doc.getElementById(addin.rootElementId);
-
         if (!rootEl) throw new Error(`Root element #${addin.rootElementId} not found in fetched HTML`);
 
-        // Make it visible (add-ins default to display:none waiting for focus())
         rootEl.style.display = 'block';
-
         const container = document.getElementById('addinMountContainer');
         container.innerHTML = '';
         container.appendChild(rootEl);
+
+        // Extract and execute all <script> tags from the fetched page,
+        // skipping any that are the add-in's own JS (already loaded separately)
+        // and skipping Bootstrap which is already on the page
+        const scripts = Array.from(doc.querySelectorAll('script'));
+        for (const script of scripts) {
+            const src = script.src || '';
+            if (src.includes('addin.js')) continue;          // loaded separately
+            if (src.includes('bootstrap')) continue;         // already on page
+            if (src.includes('font-awesome')) continue;      // already on page
+
+            await new Promise((resolve, reject) => {
+                if (script.src) {
+                    // External script — check if already loaded
+                    if (document.querySelector(`script[src="${script.src}"]`)) {
+                        resolve(); return;
+                    }
+                    const el = document.createElement('script');
+                    el.src = script.src;
+                    el.onload = resolve;
+                    el.onerror = reject;
+                    document.head.appendChild(el);
+                    injectedScripts.push(el);
+                } else if (script.textContent.trim()) {
+                    // Inline script (e.g. firebase.initializeApp)
+                    const el = document.createElement('script');
+                    el.textContent = script.textContent;
+                    document.head.appendChild(el);
+                    injectedScripts.push(el);
+                    resolve();
+                } else {
+                    resolve();
+                }
+            });
+        }
     }
 
     // ── Launch an add-in ───────────────────────────────────────────────────────
