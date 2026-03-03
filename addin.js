@@ -78,21 +78,17 @@ geotab.addin.traxxisDashboard = function () {
 
     // ── Cleanup previously injected add-in assets ──────────────────────────────
 
-    function cleanupActiveAddin() {
+    async function cleanupActiveAddin() {
         if (activeAddin && typeof activeAddin.blur === 'function') {
             try { activeAddin.blur(); } catch (e) { console.warn('blur() error:', e); }
         }
         activeAddin = null;
 
-        // Delete all active Firebase app instances so the next add-in can
-        // call initializeApp() cleanly without "duplicate app" or "no app" errors.
-        // We keep the Firebase SDK scripts in the DOM (they set window.firebase once),
-        // but we must delete the app so initializeApp() can be called again.
+        // Await deletion of all Firebase app instances so initializeApp() can be
+        // called cleanly by the next add-in without "duplicate app" errors.
         try {
             if (window.firebase && window.firebase.apps && window.firebase.apps.length > 0) {
-                window.firebase.apps.slice().forEach(app => {
-                    app.delete().catch(e => console.warn('Firebase app.delete() error:', e));
-                });
+                await Promise.all(window.firebase.apps.slice().map(app => app.delete()));
             }
         } catch (e) {
             console.warn('Firebase cleanup error:', e);
@@ -174,13 +170,13 @@ geotab.addin.traxxisDashboard = function () {
 
             await new Promise((resolve, reject) => {
                 if (script.src) {
-                    // External script — always skip Firebase SDK if already loaded into window.firebase
-                    const isFirebaseSDK = script.src.includes('firebase');
-                    if (isFirebaseSDK && window.firebase) {
-                        resolve(); return;
-                    }
-                    // Skip other already-loaded non-Firebase scripts too
-                    if (!isFirebaseSDK && document.querySelector(`script[src="${script.src}"]`)) {
+                    // For ALL scripts (including Firebase SDKs): if this exact URL is already
+                    // in the DOM, skip it. This prevents "already defined" warnings while still
+                    // loading service scripts (firestore, auth) that weren't loaded by a previous add-in.
+                    const normalizedSrc = script.src.split('?')[0]; // ignore cache-busting params
+                    const alreadyLoaded = Array.from(document.querySelectorAll('script[src]'))
+                        .some(s => s.src.split('?')[0] === normalizedSrc);
+                    if (alreadyLoaded) {
                         resolve(); return;
                     }
                     const el = document.createElement('script');
@@ -223,7 +219,7 @@ geotab.addin.traxxisDashboard = function () {
         addinView.style.display = 'flex';
 
         showAddinLoading();
-        cleanupActiveAddin();
+        await cleanupActiveAddin();
 
         try {
             await fetchAndInjectHTML(addin);
@@ -261,7 +257,7 @@ geotab.addin.traxxisDashboard = function () {
     // ── Go back to dashboard ───────────────────────────────────────────────────
 
     function goBack() {
-        cleanupActiveAddin();
+        cleanupActiveAddin(); // fire-and-forget is fine here; user is navigating away
         document.getElementById('suiteHeader').style.display = '';
         document.getElementById('addinView').style.display = 'none';
         document.getElementById('dashboardView').style.display = 'block';
