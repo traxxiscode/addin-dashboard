@@ -1,5 +1,5 @@
 /**
- * Traxxis Add-in Suite Dashboard ---
+ * Traxxis Add-in Suite Dashboard
  * @returns {{initialize: Function, focus: Function, blur: Function}}
  */
 geotab.addin.traxxisDashboard = function () {
@@ -190,10 +190,13 @@ geotab.addin.traxxisDashboard = function () {
                     document.head.appendChild(el);
                     injectedScripts.push(el);
                 } else if (script.textContent.trim()) {
-                    // Wrap in an IIFE so that const/let declarations (e.g. firebaseConfig)
-                    // don't collide when a second add-in is loaded in the same document scope.
+                    // Replace const/let declarations with var so that re-running the same
+                    // inline script (e.g. firebaseConfig) on a second add-in load doesn't
+                    // throw "Identifier already declared". var silently re-assigns instead.
                     const el = document.createElement('script');
-                    el.textContent = '(function(){\n' + script.textContent + '\n})();';
+                    el.textContent = script.textContent
+                        .replace(/\bconst\s+/g, 'var ')
+                        .replace(/\blet\s+/g, 'var ');
                     document.head.appendChild(el);
                     injectedScripts.push(el);
                     resolve();
