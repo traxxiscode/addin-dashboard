@@ -7,25 +7,31 @@ geotab.addin.traxxisDashboard = function () {
 
     let api, state, elAddin;
     let currentDatabase = null;
+    let injectedStyles = [];
+    let injectedScripts = [];
+    let activeAddin = null;
 
     // ── Add-in Registry ────────────────────────────────────────────────────────
-    // Add new add-ins here. 'url' points to the GitHub Pages hosted add-in.
+    // Each add-in points to its raw hosted files on GitHub Pages.
     const ADDIN_REGISTRY = [
         {
             id: 'hos_alerter',
             name: 'HOS Availability Alert Emailer',
             description: 'Automated Hours-of-Service limit notifications. Alerts recipients when drivers are approaching their driving, duty, rest, or weekly cycle limits.',
             icon: 'fas fa-clock',
-            url: 'https://traxxiscode.github.io/hos-alerter-frontend/index.html',  // ← replace with real URL
-            category: 'Compliance'
+            category: 'Compliance',
+            geotabKey: 'hosAlerter',                          // matches geotab.addin.hosAlerter
+            rootElementId: 'hosAlerter',                      // the id on the add-in's root div
+            baseUrl: 'https://traxxiscode.github.io/hos-alerter-frontend/',
+            htmlUrl: 'https://traxxiscode.github.io/hos-alerter-frontend/index.html',
+            jsUrl:   'https://traxxiscode.github.io/hos-alerter-frontend/addin.js',
+            cssUrl:  'https://traxxiscode.github.io/hos-alerter-frontend/addin.css'
         }
-        // Future add-ins go here:
-        // { id: 'dvir_emailer', name: 'DVIR Emailer', ... }
+        // Future add-ins:
+        // { id: 'dvir_emailer', name: 'DVIR Emailer', geotabKey: 'dvirEmailer', rootElementId: 'dvirEmailer', ... }
     ];
 
     // ── Database Access Control ────────────────────────────────────────────────
-    // Map each database name to the add-in IDs it's allowed to access.
-    // Databases not listed here will see all add-ins greyed out.
     const DATABASE_ACCESS = {
         'traxxisdemo': ['hos_alerter'],
         // 'another_db': ['hos_alerter', 'dvir_emailer'],
@@ -47,7 +53,156 @@ geotab.addin.traxxisDashboard = function () {
         if (el) el.style.display = 'flex';
     }
 
-    // ── Render ─────────────────────────────────────────────────────────────────
+    function showAddinLoading() {
+        const el = document.getElementById('addinLoadingOverlay');
+        if (el) el.style.display = 'flex';
+    }
+
+    function hideAddinLoading() {
+        const el = document.getElementById('addinLoadingOverlay');
+        if (el) el.style.display = 'none';
+    }
+
+    // ── Cleanup previously injected add-in assets ──────────────────────────────
+
+    function cleanupActiveAddin() {
+        // Call blur on the active add-in if it has one
+        if (activeAddin && typeof activeAddin.blur === 'function') {
+            try { activeAddin.blur(); } catch (e) { console.warn('blur() error:', e); }
+        }
+        activeAddin = null;
+
+        // Remove injected <link> tags
+        injectedStyles.forEach(el => { if (el && el.parentNode) el.parentNode.removeChild(el); });
+        injectedStyles = [];
+
+        // Remove injected <script> tags
+        injectedScripts.forEach(el => { if (el && el.parentNode) el.parentNode.removeChild(el); });
+        injectedScripts = [];
+
+        // Clear the addin mount container
+        const container = document.getElementById('addinMountContainer');
+        if (container) container.innerHTML = '';
+    }
+
+    // ── Inject CSS ─────────────────────────────────────────────────────────────
+
+    function injectCSS(url) {
+        return new Promise((resolve, reject) => {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = url + '?v=' + Date.now();
+            link.onload = () => resolve(link);
+            link.onerror = () => reject(new Error('Failed to load CSS: ' + url));
+            document.head.appendChild(link);
+            injectedStyles.push(link);
+        });
+    }
+
+    // ── Inject JS ──────────────────────────────────────────────────────────────
+
+    function injectJS(url) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = url + '?v=' + Date.now();
+            script.onload = () => resolve(script);
+            script.onerror = () => reject(new Error('Failed to load JS: ' + url));
+            document.head.appendChild(script);
+            injectedScripts.push(script);
+        });
+    }
+
+    // ── Fetch & inject HTML ────────────────────────────────────────────────────
+
+    async function fetchAndInjectHTML(addin) {
+        const response = await fetch(addin.htmlUrl);
+        if (!response.ok) throw new Error('Failed to fetch HTML: ' + addin.htmlUrl);
+        const html = await response.text();
+
+        // Parse the fetched HTML and extract the add-in's root element
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const rootEl = doc.getElementById(addin.rootElementId);
+
+        if (!rootEl) throw new Error(`Root element #${addin.rootElementId} not found in fetched HTML`);
+
+        // Make it visible (add-ins default to display:none waiting for focus())
+        rootEl.style.display = 'block';
+
+        const container = document.getElementById('addinMountContainer');
+        container.innerHTML = '';
+        container.appendChild(rootEl);
+    }
+
+    // ── Launch an add-in ───────────────────────────────────────────────────────
+
+    async function launchAddin(addinId) {
+        const addin = ADDIN_REGISTRY.find(a => a.id === addinId);
+        if (!addin) return;
+
+        const allowed = getAllowedAddins(currentDatabase);
+        if (!allowed.includes(addinId)) return;
+
+        // Switch views
+        document.getElementById('dashboardView').style.display = 'none';
+        const addinView = document.getElementById('addinView');
+        addinView.style.display = 'flex';
+        document.getElementById('addinViewTitle').textContent = addin.name;
+
+        showAddinLoading();
+        cleanupActiveAddin();
+
+        try {
+            // 1. Fetch and inject the add-in's HTML into the mount container
+            await fetchAndInjectHTML(addin);
+
+            // 2. Inject the add-in's CSS
+            await injectCSS(addin.cssUrl);
+
+            // 3. Inject the add-in's JS (registers geotab.addin.<key>)
+            await injectJS(addin.jsUrl);
+
+            // 4. Instantiate and initialize the add-in
+            if (!window.geotab || !window.geotab.addin || !window.geotab.addin[addin.geotabKey]) {
+                throw new Error(`geotab.addin.${addin.geotabKey} not found after script load`);
+            }
+
+            const addinInstance = window.geotab.addin[addin.geotabKey]();
+            activeAddin = addinInstance;
+
+            // initialize() — mirrors what Geotab does on add-in load
+            await new Promise((resolve) => {
+                addinInstance.initialize(api, state, resolve);
+            });
+
+            // focus() — mirrors what Geotab does when the add-in is shown
+            addinInstance.focus(api, state);
+
+            hideAddinLoading();
+
+        } catch (err) {
+            console.error('Error launching add-in:', err);
+            hideAddinLoading();
+            const container = document.getElementById('addinMountContainer');
+            container.innerHTML = `
+                <div style="padding:2rem; text-align:center; color:#dc3545;">
+                    <i class="fas fa-exclamation-triangle" style="font-size:2rem; margin-bottom:1rem;"></i>
+                    <p style="font-weight:600;">Failed to load add-in</p>
+                    <p style="font-size:0.875rem; color:#6c757d;">${err.message}</p>
+                </div>
+            `;
+        }
+    }
+
+    // ── Go back to dashboard ───────────────────────────────────────────────────
+
+    function goBack() {
+        cleanupActiveAddin();
+        document.getElementById('addinView').style.display = 'none';
+        document.getElementById('dashboardView').style.display = 'block';
+    }
+
+    // ── Render dashboard cards ─────────────────────────────────────────────────
 
     function renderDashboard(database) {
         const grid = document.getElementById('addinsGrid');
@@ -57,7 +212,7 @@ geotab.addin.traxxisDashboard = function () {
 
         const allowed = getAllowedAddins(database);
 
-        if (allowed.length === 0 && !DATABASE_ACCESS[database]) {
+        if (!DATABASE_ACCESS[database]) {
             banner.style.display = 'flex';
             msg.textContent = `Database "${database}" does not have access to any add-ins. Please contact Traxxis GPS.`;
         } else {
@@ -89,26 +244,14 @@ geotab.addin.traxxisDashboard = function () {
         }).join('');
     }
 
-    // ── Global launcher (called from inline onclick) ───────────────────────────
+    // ── Global helpers (called from inline onclick) ────────────────────────────
 
     window.traxxisDashboard_launch = function (addinId) {
-        const addin = ADDIN_REGISTRY.find(a => a.id === addinId);
-        if (!addin) return;
-
-        const allowed = getAllowedAddins(currentDatabase);
-        if (!allowed.includes(addinId)) return;
-
-        document.getElementById('dashboardView').style.display = 'none';
-        const iframeView = document.getElementById('iframeView');
-        iframeView.style.display = 'flex';
-        document.getElementById('iframeTitle').textContent = addin.name;
-        document.getElementById('addinFrame').src = addin.url;
+        launchAddin(addinId);
     };
 
     window.traxxisDashboard_back = function () {
-        document.getElementById('iframeView').style.display = 'none';
-        document.getElementById('addinFrame').src = '';
-        document.getElementById('dashboardView').style.display = 'block';
+        goBack();
     };
 
     // ── Geotab lifecycle ───────────────────────────────────────────────────────
@@ -127,26 +270,22 @@ geotab.addin.traxxisDashboard = function () {
             state = freshState;
 
             showInitialLoading();
-
             if (elAddin) elAddin.style.display = 'block';
 
             api.getSession(function (session) {
                 currentDatabase = session.database;
-
                 const dbEl = document.getElementById('headerDatabaseName');
                 if (dbEl) dbEl.textContent = currentDatabase;
-
                 renderDashboard(currentDatabase);
                 hideInitialLoading();
             });
         },
 
         blur: function () {
+            cleanupActiveAddin();
             if (elAddin) elAddin.style.display = 'none';
-            // Reset iframe when leaving
-            const frame = document.getElementById('addinFrame');
-            if (frame) frame.src = '';
-            document.getElementById('iframeView').style.display = 'none';
+            // Reset views for next focus
+            document.getElementById('addinView').style.display = 'none';
             document.getElementById('dashboardView').style.display = 'block';
         }
     };

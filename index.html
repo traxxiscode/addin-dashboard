@@ -37,7 +37,7 @@
         </div>
     </div>
 
-    <!-- Loading Overlay -->
+    <!-- Initial Loading Overlay -->
     <div id="initialLoadingOverlay" class="loading-overlay">
         <div class="loading-content">
             <div class="spinner-ring"></div>
@@ -45,15 +45,22 @@
         </div>
     </div>
 
-    <!-- iframe View -->
-    <div id="iframeView" style="display:none; flex-direction:column; height:calc(100vh - 72px);">
-        <div class="iframe-topbar">
+    <!-- Add-in View -->
+    <div id="addinView" style="display:none; flex-direction:column;">
+        <div class="addin-topbar">
             <button class="btn-back" onclick="traxxisDashboard_back()">
                 <i class="fas fa-arrow-left me-2"></i>Back to Suite
             </button>
-            <span id="iframeTitle" class="iframe-addin-title"></span>
+            <span id="addinViewTitle" class="addin-view-title"></span>
         </div>
-        <iframe id="addinFrame" src="" style="flex:1; border:none; width:100%;"></iframe>
+        <div id="addinLoadingOverlay" class="addin-loading-overlay" style="display:none;">
+            <div class="loading-content">
+                <div class="spinner-ring"></div>
+                <div class="mt-4 loading-label">Loading Add-in...</div>
+            </div>
+        </div>
+        <!-- Add-in HTML gets injected here -->
+        <div id="addinMountContainer"></div>
     </div>
 
     <!-- Dashboard View -->
