@@ -84,10 +84,11 @@ geotab.addin.traxxisDashboard = function () {
         }
         activeAddin = null;
 
+        // Remove injected <link> tags (CSS is safe to reload per add-in)
         injectedStyles.forEach(el => { if (el && el.parentNode) el.parentNode.removeChild(el); });
         injectedStyles = [];
 
-        // Only remove non-Firebase scripts
+        // Remove only non-Firebase scripts
         injectedScripts = injectedScripts.filter(el => {
             const src = el.src || '';
             const isFirebase = src.includes('firebase') || 
@@ -96,7 +97,7 @@ geotab.addin.traxxisDashboard = function () {
                 el.parentNode.removeChild(el);
                 return false;
             }
-            return true; // keep Firebase scripts in DOM
+            return true; // keep Firebase scripts in the DOM
         });
 
         const container = document.getElementById('addinMountContainer');
@@ -170,8 +171,8 @@ geotab.addin.traxxisDashboard = function () {
                     document.head.appendChild(el);
                     injectedScripts.push(el);
                 } else if (script.textContent.trim()) {
-                    // Skip if Firebase is already initialized
-                    if (script.textContent.includes('firebase') && window.db) {
+                    // Inline script — skip firebase.initializeApp if already initialized
+                    if (script.textContent.includes('initializeApp') && window.firebase && window.firebase.apps.length > 0) {
                         resolve(); return;
                     }
                     const el = document.createElement('script');
