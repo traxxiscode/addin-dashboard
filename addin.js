@@ -86,6 +86,8 @@ geotab.addin.traxxisDashboard = function () {
 
         // Delete all active Firebase app instances so the next add-in can
         // call initializeApp() cleanly without "duplicate app" or "no app" errors.
+        // We keep the Firebase SDK scripts in the DOM (they set window.firebase once),
+        // but we must delete the app so initializeApp() can be called again.
         try {
             if (window.firebase && window.firebase.apps && window.firebase.apps.length > 0) {
                 window.firebase.apps.slice().forEach(app => {
@@ -96,13 +98,21 @@ geotab.addin.traxxisDashboard = function () {
             console.warn('Firebase cleanup error:', e);
         }
 
-        // Remove injected <link> tags (CSS is safe to reload per add-in)
+        // Remove injected <link> tags
         injectedStyles.forEach(el => { if (el && el.parentNode) el.parentNode.removeChild(el); });
         injectedStyles = [];
 
-        // Remove all injected scripts (Firebase scripts will be reloaded by the next add-in)
-        injectedScripts.forEach(el => { if (el && el.parentNode) el.parentNode.removeChild(el); });
-        injectedScripts = [];
+        // Remove only non-Firebase scripts; keep Firebase SDK scripts since they are
+        // already loaded into window.firebase and cannot be re-declared.
+        injectedScripts = injectedScripts.filter(el => {
+            const src = el.src || '';
+            const isFirebaseSDK = src.includes('firebase');
+            if (!isFirebaseSDK && el.parentNode) {
+                el.parentNode.removeChild(el);
+                return false;
+            }
+            return true; // keep Firebase SDK scripts in the DOM
+        });
 
         const container = document.getElementById('addinMountContainer');
         if (container) container.innerHTML = '';
@@ -164,9 +174,13 @@ geotab.addin.traxxisDashboard = function () {
 
             await new Promise((resolve, reject) => {
                 if (script.src) {
-                    // External script — skip only non-Firebase scripts already on the page
-                    const isFirebase = script.src.includes('firebase');
-                    if (!isFirebase && document.querySelector(`script[src="${script.src}"]`)) {
+                    // External script — always skip Firebase SDK if already loaded into window.firebase
+                    const isFirebaseSDK = script.src.includes('firebase');
+                    if (isFirebaseSDK && window.firebase) {
+                        resolve(); return;
+                    }
+                    // Skip other already-loaded non-Firebase scripts too
+                    if (!isFirebaseSDK && document.querySelector(`script[src="${script.src}"]`)) {
                         resolve(); return;
                     }
                     const el = document.createElement('script');
@@ -176,9 +190,10 @@ geotab.addin.traxxisDashboard = function () {
                     document.head.appendChild(el);
                     injectedScripts.push(el);
                 } else if (script.textContent.trim()) {
-                    // Inline script — always execute (Firebase app was deleted during cleanup)
+                    // Wrap in an IIFE so that const/let declarations (e.g. firebaseConfig)
+                    // don't collide when a second add-in is loaded in the same document scope.
                     const el = document.createElement('script');
-                    el.textContent = script.textContent;
+                    el.textContent = '(function(){\n' + script.textContent + '\n})();';
                     document.head.appendChild(el);
                     injectedScripts.push(el);
                     resolve();
