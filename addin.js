@@ -184,24 +184,18 @@ geotab.addin.traxxisDashboard = function () {
 
         // Switch views
         document.getElementById('dashboardView').style.display = 'none';
+        document.getElementById('suiteHeader').style.display = 'none';
         const addinView = document.getElementById('addinView');
         addinView.style.display = 'flex';
-        document.getElementById('addinViewTitle').textContent = addin.name;
 
         showAddinLoading();
         cleanupActiveAddin();
 
         try {
-            // 1. Fetch and inject the add-in's HTML into the mount container
             await fetchAndInjectHTML(addin);
-
-            // 2. Inject the add-in's CSS
             await injectCSS(addin.cssUrl);
-
-            // 3. Inject the add-in's JS (registers geotab.addin.<key>)
             await injectJS(addin.jsUrl);
 
-            // 4. Instantiate and initialize the add-in
             if (!window.geotab || !window.geotab.addin || !window.geotab.addin[addin.geotabKey]) {
                 throw new Error(`geotab.addin.${addin.geotabKey} not found after script load`);
             }
@@ -209,14 +203,11 @@ geotab.addin.traxxisDashboard = function () {
             const addinInstance = window.geotab.addin[addin.geotabKey]();
             activeAddin = addinInstance;
 
-            // initialize() — mirrors what Geotab does on add-in load
             await new Promise((resolve) => {
                 addinInstance.initialize(api, state, resolve);
             });
 
-            // focus() — mirrors what Geotab does when the add-in is shown
             addinInstance.focus(api, state);
-
             hideAddinLoading();
 
         } catch (err) {
@@ -237,6 +228,7 @@ geotab.addin.traxxisDashboard = function () {
 
     function goBack() {
         cleanupActiveAddin();
+        document.getElementById('suiteHeader').style.display = '';
         document.getElementById('addinView').style.display = 'none';
         document.getElementById('dashboardView').style.display = 'block';
     }

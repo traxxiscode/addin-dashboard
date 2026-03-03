@@ -14,12 +14,12 @@
 <div id="traxxisDashboard" style="display:none;">
 
     <!-- Header -->
-    <div class="custom-header">
+    <div class="custom-header" id="suiteHeader">
         <div class="container-fluid px-4">
             <div class="row align-items-center">
                 <div class="col-auto">
                     <img src="https://traxxisgps.com/wp-content/uploads/elementor/thumbs/Traxxis-refresh-logo_horizontal-min-1-qjgvd5cr9kxu5eay6trn10pbylz31ardqnqdluuew0.webp"
-                         alt="Traxxis GPS" class="header-logo">
+                        alt="Traxxis GPS" class="header-logo">
                 </div>
                 <div class="col">
                     <div class="header-content">
@@ -51,7 +51,6 @@
             <button class="btn-back" onclick="traxxisDashboard_back()">
                 <i class="fas fa-arrow-left me-2"></i>Back to Suite
             </button>
-            <span id="addinViewTitle" class="addin-view-title"></span>
         </div>
         <div id="addinLoadingOverlay" class="addin-loading-overlay" style="display:none;">
             <div class="loading-content">
@@ -59,7 +58,6 @@
                 <div class="mt-4 loading-label">Loading Add-in...</div>
             </div>
         </div>
-        <!-- Add-in HTML gets injected here -->
         <div id="addinMountContainer"></div>
     </div>
 
