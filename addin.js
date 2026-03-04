@@ -63,7 +63,7 @@ geotab.addin.traxxisDashboard = function () {
             geotabKey: 'ruckitAssets',
             rootElementId: 'ruckitAssets',
             baseUrl: 'https://traxxiscode.github.io/ruckit-integration-frontend/',
-            htmlUrl: 'https://traxxiscode.github.io/ruckit-integration-frontend/ruckitAssets.html',
+            htmlUrl: 'https://traxxiscode.github.io/ruckit-integration-frontend/index.html',
             jsUrl:   'https://traxxiscode.github.io/ruckit-integration-frontend/ruckitAssets.js',
             cssUrl:  'https://traxxiscode.github.io/ruckit-integration-frontend/ruckitAssets.css'
         },
