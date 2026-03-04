@@ -64,8 +64,8 @@ geotab.addin.traxxisDashboard = function () {
             rootElementId: 'ruckitAssets',
             baseUrl: 'https://traxxiscode.github.io/ruckit-integration-frontend/',
             htmlUrl: 'https://traxxiscode.github.io/ruckit-integration-frontend/index.html',
-            jsUrl:   'https://traxxiscode.github.io/ruckit-integration-frontend/ruckitAssets.js',
-            cssUrl:  'https://traxxiscode.github.io/ruckit-integration-frontend/ruckitAssets.css'
+            jsUrl:   'https://traxxiscode.github.io/ruckit-integration-frontend/addin.js',
+            cssUrl:  'https://traxxiscode.github.io/ruckit-integration-frontend/addin.css'
         },
         {
             id: 'terminal_report_zone_manager',
@@ -91,7 +91,7 @@ geotab.addin.traxxisDashboard = function () {
             baseUrl: 'https://traxxiscode.github.io/YMAnnotator-frontend/',
             htmlUrl: 'https://traxxiscode.github.io/YMAnnotator-frontend/index.html',
             jsUrl:   'https://traxxiscode.github.io/YMAnnotator-frontend/addin.js',
-            cssUrl:  'https://traxxiscode.github.io/YMAnnotator-frontend/index.css'
+            cssUrl:  'https://traxxiscode.github.io/YMAnnotator-frontend/addin.css'
         }
         // Future add-ins:
         // { id: 'dvir_emailer', name: 'DVIR Emailer', geotabKey: 'dvirEmailer', rootElementId: 'dvirEmailer', ... }
