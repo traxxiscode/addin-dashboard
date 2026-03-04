@@ -75,10 +75,10 @@ geotab.addin.traxxisDashboard = function () {
             category: 'Zone Management',
             geotabKey: 'terminalReportZones',
             rootElementId: 'terminalReportZones',
-            baseUrl: 'https://traxxiscode.github.io/terminal-report-zone-manager-frontend/',
-            htmlUrl: 'https://traxxiscode.github.io/terminal-report-zone-manager-frontend/index.html',
-            jsUrl:   'https://traxxiscode.github.io/terminal-report-zone-manager-frontend/addin.js',
-            cssUrl:  'https://traxxiscode.github.io/terminal-report-zone-manager-frontend/addin.css'
+            baseUrl: 'https://traxxiscode.github.io/terminal-zone-manager-frontend/',
+            htmlUrl: 'https://traxxiscode.github.io/terminal-zone-manager-frontend/index.html',
+            jsUrl:   'https://traxxiscode.github.io/terminal-zone-manager-frontend/addin.js',
+            cssUrl:  'https://traxxiscode.github.io/terminal-zone-manager-frontend/addin.css'
         }
         // Future add-ins:
         // { id: 'dvir_emailer', name: 'DVIR Emailer', geotabKey: 'dvirEmailer', rootElementId: 'dvirEmailer', ... }
