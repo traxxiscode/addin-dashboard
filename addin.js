@@ -79,6 +79,19 @@ geotab.addin.traxxisDashboard = function () {
             htmlUrl: 'https://traxxiscode.github.io/terminal-zone-manager-frontend/index.html',
             jsUrl:   'https://traxxiscode.github.io/terminal-zone-manager-frontend/addin.js',
             cssUrl:  'https://traxxiscode.github.io/terminal-zone-manager-frontend/addin.css'
+        },
+        {
+            id: 'yard_move_zone_manager',
+            name: 'Yard Move Zone Manager',
+            description: 'Manage geofenced zones for yard move detection.',
+            icon: 'fas fa-map-marker-alt',
+            category: 'Zone Management',
+            geotabKey: 'yardMoveZones',
+            rootElementId: 'yardMoveZones',
+            baseUrl: 'https://traxxiscode.github.io/YMAnnotator-frontend/',
+            htmlUrl: 'https://traxxiscode.github.io/YMAnnotator-frontend/index.html',
+            jsUrl:   'https://traxxiscode.github.io/YMAnnotator-frontend/addin.js',
+            cssUrl:  'https://traxxiscode.github.io/YMAnnotator-frontend/addin.css'
         }
         // Future add-ins:
         // { id: 'dvir_emailer', name: 'DVIR Emailer', geotabKey: 'dvirEmailer', rootElementId: 'dvirEmailer', ... }
@@ -86,7 +99,7 @@ geotab.addin.traxxisDashboard = function () {
 
     // ── Database Access Control ────────────────────────────────────────────────
     const DATABASE_ACCESS = {
-        'traxxisdemo': ['hos_alerter', 'device_manager', 'dvir_emailer', 'ruckit_assets', 'terminal_report_zone_manager'],
+        'traxxisdemo': ['hos_alerter', 'device_manager', 'dvir_emailer', 'ruckit_assets', 'terminal_report_zone_manager', 'yard_move_zone_manager'],
         // 'another_db': ['hos_alerter', 'dvir_emailer'],
     };
 
