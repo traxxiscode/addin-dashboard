@@ -39,6 +39,20 @@ geotab.addin.traxxisDashboard = function () {
             htmlUrl: 'https://traxxiscode.github.io/DigitalMatter-DeviceManager/public/index.html',
             jsUrl:   'https://traxxiscode.github.io/DigitalMatter-DeviceManager/public/addin.js',
             cssUrl:  'https://traxxiscode.github.io/DigitalMatter-DeviceManager/public/addin.css'
+        },
+        {
+            id: 'dvir_emailer',
+            name: 'DVIR Emailer',
+            description: 'Automated DVIR email reports.',
+            icon: 'fas fa-envelope',
+            category: 'Compliance',
+            geotabKey: 'dvirEmailer',
+            rootElementId: 'dvirEmailer',
+            baseUrl: 'https://traxxiscode.github.io/dvir-emailer-frontend/',
+            htmlUrl: 'https://traxxiscode.github.io/dvir-emailer-frontend/index.html',
+            jsUrl:   'https://traxxiscode.github.io/dvir-emailer-frontend/addin.js',
+            cssUrl:  'https://traxxiscode.github.io/dvir-emailer-frontend/addin.css'
+
         }
         // Future add-ins:
         // { id: 'dvir_emailer', name: 'DVIR Emailer', geotabKey: 'dvirEmailer', rootElementId: 'dvirEmailer', ... }
