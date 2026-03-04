@@ -53,6 +53,19 @@ geotab.addin.traxxisDashboard = function () {
             jsUrl:   'https://traxxiscode.github.io/dvir-emailer-frontend/addin.js',
             cssUrl:  'https://traxxiscode.github.io/dvir-emailer-frontend/addin.css'
 
+        },
+        {
+            id: 'ruckit_assets',
+            name: 'Ruckit Assets',
+            description: 'Manage and track your Ruckit assets.',
+            icon: 'fas fa-box',
+            category: 'Asset Management',
+            geotabKey: 'ruckitAssets',
+            rootElementId: 'ruckitAssets',
+            baseUrl: 'https://traxxiscode.github.io/ruckit-integration-frontend/',
+            htmlUrl: 'https://traxxiscode.github.io/ruckit-integration-frontend/ruckitAssets.html',
+            jsUrl:   'https://traxxiscode.github.io/ruckit-integration-frontend/ruckitAssets.js',
+            cssUrl:  'https://traxxiscode.github.io/ruckit-integration-frontend/ruckitAssets.css'
         }
         // Future add-ins:
         // { id: 'dvir_emailer', name: 'DVIR Emailer', geotabKey: 'dvirEmailer', rootElementId: 'dvirEmailer', ... }
@@ -60,7 +73,7 @@ geotab.addin.traxxisDashboard = function () {
 
     // ── Database Access Control ────────────────────────────────────────────────
     const DATABASE_ACCESS = {
-        'traxxisdemo': ['hos_alerter', 'device_manager'],
+        'traxxisdemo': ['hos_alerter', 'device_manager', 'dvir_emailer', 'ruckit_assets'],
         // 'another_db': ['hos_alerter', 'dvir_emailer'],
     };
 
