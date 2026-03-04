@@ -66,6 +66,19 @@ geotab.addin.traxxisDashboard = function () {
             htmlUrl: 'https://traxxiscode.github.io/ruckit-integration-frontend/ruckitAssets.html',
             jsUrl:   'https://traxxiscode.github.io/ruckit-integration-frontend/ruckitAssets.js',
             cssUrl:  'https://traxxiscode.github.io/ruckit-integration-frontend/ruckitAssets.css'
+        },
+        {
+            id: 'terminal_report_zone_manager',
+            name: 'Terminal Report Zone Manager',
+            description: 'Manage geofenced zones for terminal reporting.',
+            icon: 'fas fa-map-marker-alt',
+            category: 'Zone Management',
+            geotabKey: 'terminalReportZones',
+            rootElementId: 'terminalReportZones',
+            baseUrl: 'https://traxxiscode.github.io/terminal-report-zone-manager-frontend/',
+            htmlUrl: 'https://traxxiscode.github.io/terminal-report-zone-manager-frontend/index.html',
+            jsUrl:   'https://traxxiscode.github.io/terminal-report-zone-manager-frontend/addin.js',
+            cssUrl:  'https://traxxiscode.github.io/terminal-report-zone-manager-frontend/addin.css'
         }
         // Future add-ins:
         // { id: 'dvir_emailer', name: 'DVIR Emailer', geotabKey: 'dvirEmailer', rootElementId: 'dvirEmailer', ... }
@@ -73,7 +86,7 @@ geotab.addin.traxxisDashboard = function () {
 
     // ── Database Access Control ────────────────────────────────────────────────
     const DATABASE_ACCESS = {
-        'traxxisdemo': ['hos_alerter', 'device_manager', 'dvir_emailer', 'ruckit_assets'],
+        'traxxisdemo': ['hos_alerter', 'device_manager', 'dvir_emailer', 'ruckit_assets', 'terminal_report_zone_manager'],
         // 'another_db': ['hos_alerter', 'dvir_emailer'],
     };
 
