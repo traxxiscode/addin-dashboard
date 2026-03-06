@@ -13,21 +13,23 @@
 <body>
 <div id="traxxisDashboard" style="display:none;">
 
-    <!-- Header -->
-    <div class="custom-header" id="suiteHeader">
-        <div class="container-fluid px-4">
-            <div class="row align-items-center">
-                <div class="col-auto">
-                    <img src="https://cdn.baseline.is/static/content/logos/mDtvptChQ3XwBLuxuu5hip-lala.svg"
-                        alt="Logo" class="header-logo">
-                </div>
-                <div class="col">
-                    <div class="header-content">
-                        <h1 class="header-title">Add-in Suite</h1>
-                    </div>
-                </div>
-
+    <!-- ── Persistent Header ── -->
+    <div class="suite-header" id="suiteHeader">
+        <!-- Top bar -->
+        <div class="suite-header__topbar">
+            <div class="suite-header__left">
+                <button class="btn-back-circle" id="backBtn" onclick="traxxisDashboard_back()" style="display:none;" aria-label="Back to dashboard">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <img src="https://cdn.baseline.is/static/content/logos/mDtvptChQ3XwBLuxuu5hip-lala.svg"
+                     alt="Logo" class="header-logo">
             </div>
+            <!-- Right slot: injected per-add-in action buttons land here -->
+            <div class="suite-header__actions" id="headerActionsSlot"></div>
+        </div>
+        <!-- Tab strip: hidden on dashboard, shown when an add-in is active -->
+        <div class="suite-header__tabs" id="suiteTabStrip" style="display:none;">
+            <!-- Tabs rendered by JS -->
         </div>
     </div>
 
@@ -40,12 +42,7 @@
     </div>
 
     <!-- Add-in View -->
-    <div id="addinView" style="display:none; flex-direction:column;">
-        <div class="addin-topbar">
-            <button class="btn-back" onclick="traxxisDashboard_back()">
-                <i class="fas fa-arrow-left me-2"></i>Back to Suite
-            </button>
-        </div>
+    <div id="addinView" style="display:none;">
         <div id="addinLoadingOverlay" class="addin-loading-overlay" style="display:none;">
             <div class="loading-content">
                 <div class="spinner-ring"></div>

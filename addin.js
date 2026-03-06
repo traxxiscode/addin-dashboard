@@ -10,9 +10,9 @@ geotab.addin.traxxisDashboard = function () {
     let injectedStyles = [];
     let injectedScripts = [];
     let activeAddin = null;
+    let activeAddinId = null;
 
     // ── Add-in Registry ────────────────────────────────────────────────────────
-    // Each add-in points to its raw hosted files on GitHub Pages.
     const ADDIN_REGISTRY = [
         {
             id: 'hos_alerter',
@@ -20,8 +20,8 @@ geotab.addin.traxxisDashboard = function () {
             description: 'Automated Hours-of-Service limit notifications. Alerts recipients when drivers are approaching their driving, duty, rest, or weekly cycle limits.',
             icon: 'fas fa-clock',
             category: 'Compliance',
-            geotabKey: 'hosAlerter',                          // matches geotab.addin.hosAlerter
-            rootElementId: 'hosAlerter',                      // the id on the add-in's root div
+            geotabKey: 'hosAlerter',
+            rootElementId: 'hosAlerter',
             baseUrl: 'https://traxxiscode.github.io/hos-alerter-frontend/',
             htmlUrl: 'https://traxxiscode.github.io/hos-alerter-frontend/index.html',
             jsUrl:   'https://traxxiscode.github.io/hos-alerter-frontend/addin.js',
@@ -52,7 +52,6 @@ geotab.addin.traxxisDashboard = function () {
             htmlUrl: 'https://traxxiscode.github.io/dvir-emailer-frontend/index.html',
             jsUrl:   'https://traxxiscode.github.io/dvir-emailer-frontend/addin.js',
             cssUrl:  'https://traxxiscode.github.io/dvir-emailer-frontend/addin.css'
-
         },
         {
             id: 'ruckit_assets',
@@ -93,14 +92,11 @@ geotab.addin.traxxisDashboard = function () {
             jsUrl:   'https://traxxiscode.github.io/YMAnnotator-frontend/addin.js',
             cssUrl:  'https://traxxiscode.github.io/YMAnnotator-frontend/addin.css'
         }
-        // Future add-ins:
-        // { id: 'dvir_emailer', name: 'DVIR Emailer', geotabKey: 'dvirEmailer', rootElementId: 'dvirEmailer', ... }
     ];
 
     // ── Database Access Control ────────────────────────────────────────────────
     const DATABASE_ACCESS = {
         'traxxisdemo': ['hos_alerter', 'device_manager', 'dvir_emailer', 'ruckit_assets', 'terminal_report_zone_manager', 'yard_move_zone_manager'],
-        // 'another_db': ['hos_alerter', 'dvir_emailer'],
     };
 
     // ── Helpers ────────────────────────────────────────────────────────────────
@@ -129,6 +125,73 @@ geotab.addin.traxxisDashboard = function () {
         if (el) el.style.display = 'none';
     }
 
+    // ── Header: show/hide back button ─────────────────────────────────────────
+
+    function showBackButton() {
+        const btn = document.getElementById('backBtn');
+        if (btn) btn.style.display = 'flex';
+    }
+
+    function hideBackButton() {
+        const btn = document.getElementById('backBtn');
+        if (btn) btn.style.display = 'none';
+    }
+
+    // ── Header: tab strip ─────────────────────────────────────────────────────
+
+    function renderTabStrip(allowedIds, activeId) {
+        const strip = document.getElementById('suiteTabStrip');
+        if (!strip) return;
+
+        const allowedAddins = ADDIN_REGISTRY.filter(a => allowedIds.includes(a.id));
+        strip.innerHTML = allowedAddins.map(addin => `
+            <button
+                class="suite-tab ${addin.id === activeId ? 'suite-tab--active' : ''}"
+                id="tab-${addin.id}"
+                onclick="traxxisDashboard_launch('${addin.id}')">
+                <i class="${addin.icon}"></i>
+                <span>${addin.name}</span>
+            </button>
+        `).join('');
+        strip.style.display = 'flex';
+    }
+
+    function hideTabStrip() {
+        const strip = document.getElementById('suiteTabStrip');
+        if (strip) strip.style.display = 'none';
+    }
+
+    function setActiveTab(addinId) {
+        document.querySelectorAll('.suite-tab').forEach(tab => {
+            tab.classList.toggle('suite-tab--active', tab.id === 'tab-' + addinId);
+        });
+    }
+
+    // ── Header: actions slot ──────────────────────────────────────────────────
+
+    function clearActionsSlot() {
+        const slot = document.getElementById('headerActionsSlot');
+        if (slot) slot.innerHTML = '';
+    }
+
+    // Moves action buttons from the add-in's [data-suite-actions] holder into
+    // the suite header slot. The holder stays hidden in the DOM so the add-in's
+    // JS can still reference its buttons by id without any changes.
+    function hoistAddinHeader() {
+        clearActionsSlot();
+        const slot = document.getElementById('headerActionsSlot');
+        if (!slot) return;
+
+        const actionsHolder = document.querySelector('#addinMountContainer [data-suite-actions]');
+        if (!actionsHolder) return;
+
+        // Move each child button directly into the slot (not a clone) so that
+        // any JS inside the add-in that touches e.g. refreshBtn by id still works.
+        Array.from(actionsHolder.children).forEach(el => {
+            slot.appendChild(el);
+        });
+    }
+
     // ── Cleanup previously injected add-in assets ──────────────────────────────
 
     async function cleanupActiveAddin() {
@@ -136,9 +199,8 @@ geotab.addin.traxxisDashboard = function () {
             try { activeAddin.blur(); } catch (e) { console.warn('blur() error:', e); }
         }
         activeAddin = null;
+        activeAddinId = null;
 
-        // Await deletion of all Firebase app instances so initializeApp() can be
-        // called cleanly by the next add-in without "duplicate app" errors.
         try {
             if (window.firebase && window.firebase.apps && window.firebase.apps.length > 0) {
                 await Promise.all(window.firebase.apps.slice().map(app => app.delete()));
@@ -147,12 +209,9 @@ geotab.addin.traxxisDashboard = function () {
             console.warn('Firebase cleanup error:', e);
         }
 
-        // Remove injected <link> tags
         injectedStyles.forEach(el => { if (el && el.parentNode) el.parentNode.removeChild(el); });
         injectedStyles = [];
 
-        // Remove only non-Firebase scripts; keep Firebase SDK scripts since they are
-        // already loaded into window.firebase and cannot be re-declared.
         injectedScripts = injectedScripts.filter(el => {
             const src = el.src || '';
             const isFirebaseSDK = src.includes('firebase');
@@ -160,11 +219,13 @@ geotab.addin.traxxisDashboard = function () {
                 el.parentNode.removeChild(el);
                 return false;
             }
-            return true; // keep Firebase SDK scripts in the DOM
+            return true;
         });
 
         const container = document.getElementById('addinMountContainer');
         if (container) container.innerHTML = '';
+
+        clearActionsSlot();
     }
 
     // ── Inject CSS ─────────────────────────────────────────────────────────────
@@ -211,27 +272,19 @@ geotab.addin.traxxisDashboard = function () {
         container.innerHTML = '';
         container.appendChild(rootEl);
 
-        // Extract and execute all <script> tags from the fetched page,
-        // skipping any that are the add-in's own JS (already loaded separately)
-        // and skipping Bootstrap which is already on the page
         const scripts = Array.from(doc.querySelectorAll('script'));
         for (const script of scripts) {
             const src = script.src || '';
-            if (src.includes('addin.js')) continue;          // loaded separately
-            if (src.includes('bootstrap')) continue;         // already on page
-            if (src.includes('font-awesome')) continue;      // already on page
+            if (src.includes('addin.js')) continue;
+            if (src.includes('bootstrap')) continue;
+            if (src.includes('font-awesome')) continue;
 
             await new Promise((resolve, reject) => {
                 if (script.src) {
-                    // For ALL scripts (including Firebase SDKs): if this exact URL is already
-                    // in the DOM, skip it. This prevents "already defined" warnings while still
-                    // loading service scripts (firestore, auth) that weren't loaded by a previous add-in.
-                    const normalizedSrc = script.src.split('?')[0]; // ignore cache-busting params
+                    const normalizedSrc = script.src.split('?')[0];
                     const alreadyLoaded = Array.from(document.querySelectorAll('script[src]'))
                         .some(s => s.src.split('?')[0] === normalizedSrc);
-                    if (alreadyLoaded) {
-                        resolve(); return;
-                    }
+                    if (alreadyLoaded) { resolve(); return; }
                     const el = document.createElement('script');
                     el.src = script.src;
                     el.onload = resolve;
@@ -239,9 +292,6 @@ geotab.addin.traxxisDashboard = function () {
                     document.head.appendChild(el);
                     injectedScripts.push(el);
                 } else if (script.textContent.trim()) {
-                    // Replace const/let declarations with var so that re-running the same
-                    // inline script (e.g. firebaseConfig) on a second add-in load doesn't
-                    // throw "Identifier already declared". var silently re-assigns instead.
                     const el = document.createElement('script');
                     el.textContent = script.textContent
                         .replace(/\bconst\s+/g, 'var ')
@@ -265,11 +315,15 @@ geotab.addin.traxxisDashboard = function () {
         const allowed = getAllowedAddins(currentDatabase);
         if (!allowed.includes(addinId)) return;
 
-        // Switch views
+        // If same add-in is already active, do nothing
+        if (addinId === activeAddinId) return;
+
+        // Switch to add-in view (first time only — keep it visible during tab switches)
         document.getElementById('dashboardView').style.display = 'none';
-        document.getElementById('suiteHeader').style.display = 'none';
-        const addinView = document.getElementById('addinView');
-        addinView.style.display = 'flex';
+        document.getElementById('addinView').style.display = 'block';
+
+        // Update tab strip highlight immediately
+        setActiveTab(addinId);
 
         showAddinLoading();
         await cleanupActiveAddin();
@@ -285,16 +339,22 @@ geotab.addin.traxxisDashboard = function () {
 
             const addinInstance = window.geotab.addin[addin.geotabKey]();
             activeAddin = addinInstance;
+            activeAddinId = addinId;
 
             await new Promise((resolve) => {
                 addinInstance.initialize(api, state, resolve);
             });
 
             addinInstance.focus(api, state);
+
+            // Hoist add-in's action buttons into the suite header
+            hoistAddinHeader();
+
             hideAddinLoading();
 
         } catch (err) {
             console.error('Error launching add-in:', err);
+            activeAddinId = null;
             hideAddinLoading();
             const container = document.getElementById('addinMountContainer');
             container.innerHTML = `
@@ -310,8 +370,9 @@ geotab.addin.traxxisDashboard = function () {
     // ── Go back to dashboard ───────────────────────────────────────────────────
 
     function goBack() {
-        cleanupActiveAddin(); // fire-and-forget is fine here; user is navigating away
-        document.getElementById('suiteHeader').style.display = '';
+        cleanupActiveAddin();
+        hideBackButton();
+        hideTabStrip();
         document.getElementById('addinView').style.display = 'none';
         document.getElementById('dashboardView').style.display = 'block';
     }
@@ -361,6 +422,14 @@ geotab.addin.traxxisDashboard = function () {
     // ── Global helpers (called from inline onclick) ────────────────────────────
 
     window.traxxisDashboard_launch = function (addinId) {
+        const allowed = getAllowedAddins(currentDatabase);
+
+        // First launch from dashboard: show back button + tab strip
+        if (!activeAddinId) {
+            showBackButton();
+            renderTabStrip(allowed, addinId);
+        }
+
         launchAddin(addinId);
     };
 
@@ -388,8 +457,6 @@ geotab.addin.traxxisDashboard = function () {
 
             api.getSession(function (session) {
                 currentDatabase = session.database;
-                const dbEl = document.getElementById('headerDatabaseName');
-                if (dbEl) dbEl.textContent = currentDatabase;
                 renderDashboard(currentDatabase);
                 hideInitialLoading();
             });
@@ -397,8 +464,9 @@ geotab.addin.traxxisDashboard = function () {
 
         blur: function () {
             cleanupActiveAddin();
+            hideBackButton();
+            hideTabStrip();
             if (elAddin) elAddin.style.display = 'none';
-            // Reset views for next focus
             document.getElementById('addinView').style.display = 'none';
             document.getElementById('dashboardView').style.display = 'block';
         }
