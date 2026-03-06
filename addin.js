@@ -12,7 +12,6 @@ geotab.addin.traxxisDashboard = function () {
     let activeAddin = null;
 
     // ── Add-in Registry ────────────────────────────────────────────────────────
-    // Each add-in points to its raw hosted files on GitHub Pages.
     const ADDIN_REGISTRY = [
         {
             id: 'hos_alerter',
@@ -20,8 +19,8 @@ geotab.addin.traxxisDashboard = function () {
             description: 'Automated Hours-of-Service limit notifications. Alerts recipients when drivers are approaching their driving, duty, rest, or weekly cycle limits.',
             icon: 'fas fa-clock',
             category: 'Compliance',
-            geotabKey: 'hosAlerter',                          // matches geotab.addin.hosAlerter
-            rootElementId: 'hosAlerter',                      // the id on the add-in's root div
+            geotabKey: 'hosAlerter',
+            rootElementId: 'hosAlerter',
             baseUrl: 'https://traxxiscode.github.io/hos-alerter-frontend/',
             htmlUrl: 'https://traxxiscode.github.io/hos-alerter-frontend/index.html',
             jsUrl:   'https://traxxiscode.github.io/hos-alerter-frontend/addin.js',
@@ -31,7 +30,7 @@ geotab.addin.traxxisDashboard = function () {
             id: 'device_manager',
             name: 'Digital Matter Device Manager',
             description: 'Manage and configure your Digital Matter devices directly from MyGeotab.',
-            icon: 'fas fa-cogs',
+            icon: 'fas fa-microchip',
             category: 'Device Management',
             geotabKey: 'digitalMatterDeviceManager',
             rootElementId: 'digitalMatterDeviceManager',
@@ -52,13 +51,12 @@ geotab.addin.traxxisDashboard = function () {
             htmlUrl: 'https://traxxiscode.github.io/dvir-emailer-frontend/index.html',
             jsUrl:   'https://traxxiscode.github.io/dvir-emailer-frontend/addin.js',
             cssUrl:  'https://traxxiscode.github.io/dvir-emailer-frontend/addin.css'
-
         },
         {
             id: 'ruckit_assets',
             name: 'Ruckit Assets',
             description: 'Manage and track your Ruckit assets.',
-            icon: 'fas fa-box',
+            icon: 'fas fa-boxes-stacked',
             category: 'Asset Management',
             geotabKey: 'ruckitAssets',
             rootElementId: 'ruckitAssets',
@@ -71,7 +69,7 @@ geotab.addin.traxxisDashboard = function () {
             id: 'terminal_report_zone_manager',
             name: 'Terminal Report Zone Manager',
             description: 'Manage geofenced zones for terminal reporting.',
-            icon: 'fas fa-map-marker-alt',
+            icon: 'fas fa-map-pin',
             category: 'Zone Management',
             geotabKey: 'terminalReportZones',
             rootElementId: 'terminalReportZones',
@@ -84,7 +82,7 @@ geotab.addin.traxxisDashboard = function () {
             id: 'yard_move_zone_manager',
             name: 'Yard Move Zone Manager',
             description: 'Manage geofenced zones for yard move detection.',
-            icon: 'fas fa-map-marker-alt',
+            icon: 'fas fa-route',
             category: 'Zone Management',
             geotabKey: 'yardMoveZones',
             rootElementId: 'yardMoveZones',
@@ -93,14 +91,11 @@ geotab.addin.traxxisDashboard = function () {
             jsUrl:   'https://traxxiscode.github.io/YMAnnotator-frontend/addin.js',
             cssUrl:  'https://traxxiscode.github.io/YMAnnotator-frontend/addin.css'
         }
-        // Future add-ins:
-        // { id: 'dvir_emailer', name: 'DVIR Emailer', geotabKey: 'dvirEmailer', rootElementId: 'dvirEmailer', ... }
     ];
 
     // ── Database Access Control ────────────────────────────────────────────────
     const DATABASE_ACCESS = {
         'traxxisdemo': ['hos_alerter', 'device_manager', 'dvir_emailer', 'ruckit_assets', 'terminal_report_zone_manager', 'yard_move_zone_manager'],
-        // 'another_db': ['hos_alerter', 'dvir_emailer'],
     };
 
     // ── Helpers ────────────────────────────────────────────────────────────────
@@ -129,6 +124,60 @@ geotab.addin.traxxisDashboard = function () {
         if (el) el.style.display = 'none';
     }
 
+    // ── Header injection ───────────────────────────────────────────────────────
+
+    /**
+     * Dashboard mode: right slot shows the current database badge.
+     */
+    function setHeaderDashboard() {
+        const left  = document.getElementById('headerLeft');
+        const right = document.getElementById('headerRight');
+        if (left)  left.innerHTML = '';
+        if (right) {
+            right.innerHTML = `
+                <span class="header-badge">
+                    <i class="fas fa-database me-1" style="opacity:0.6;font-size:0.7rem;"></i>
+                    <span id="headerDatabaseName">${currentDatabase || ''}</span>
+                </span>`;
+        }
+    }
+
+    /**
+     * Add-in mode: left slot gets back button + breadcrumb;
+     * right slot gets any addin-specific header actions.
+     */
+    function setHeaderAddin(addin) {
+        const left  = document.getElementById('headerLeft');
+        const right = document.getElementById('headerRight');
+
+        if (left) {
+            left.innerHTML = `
+                <button class="btn-back" onclick="traxxisDashboard_back()">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <div class="header-breadcrumb">
+                    <span>Suite</span>
+                    <span class="bc-sep"><i class="fas fa-chevron-right"></i></span>
+                    <span class="bc-current">${addin.name}</span>
+                </div>`;
+        }
+
+        if (right) {
+            // Inject a Refresh button for the device manager;
+            // other add-ins can register their own header actions here.
+            if (addin.id === 'device_manager') {
+                right.innerHTML = `
+                    <button class="btn-secondary"
+                            id="refreshDevicesBtn"
+                            onclick="typeof refreshDevices === 'function' && refreshDevices()">
+                        <i class="fas fa-rotate-right"></i> Refresh
+                    </button>`;
+            } else {
+                right.innerHTML = '';
+            }
+        }
+    }
+
     // ── Cleanup previously injected add-in assets ──────────────────────────────
 
     async function cleanupActiveAddin() {
@@ -137,22 +186,15 @@ geotab.addin.traxxisDashboard = function () {
         }
         activeAddin = null;
 
-        // Await deletion of all Firebase app instances so initializeApp() can be
-        // called cleanly by the next add-in without "duplicate app" errors.
         try {
             if (window.firebase && window.firebase.apps && window.firebase.apps.length > 0) {
                 await Promise.all(window.firebase.apps.slice().map(app => app.delete()));
             }
-        } catch (e) {
-            console.warn('Firebase cleanup error:', e);
-        }
+        } catch (e) { console.warn('Firebase cleanup error:', e); }
 
-        // Remove injected <link> tags
         injectedStyles.forEach(el => { if (el && el.parentNode) el.parentNode.removeChild(el); });
         injectedStyles = [];
 
-        // Remove only non-Firebase scripts; keep Firebase SDK scripts since they are
-        // already loaded into window.firebase and cannot be re-declared.
         injectedScripts = injectedScripts.filter(el => {
             const src = el.src || '';
             const isFirebaseSDK = src.includes('firebase');
@@ -160,7 +202,7 @@ geotab.addin.traxxisDashboard = function () {
                 el.parentNode.removeChild(el);
                 return false;
             }
-            return true; // keep Firebase SDK scripts in the DOM
+            return true;
         });
 
         const container = document.getElementById('addinMountContainer');
@@ -211,27 +253,19 @@ geotab.addin.traxxisDashboard = function () {
         container.innerHTML = '';
         container.appendChild(rootEl);
 
-        // Extract and execute all <script> tags from the fetched page,
-        // skipping any that are the add-in's own JS (already loaded separately)
-        // and skipping Bootstrap which is already on the page
         const scripts = Array.from(doc.querySelectorAll('script'));
         for (const script of scripts) {
             const src = script.src || '';
-            if (src.includes('addin.js')) continue;          // loaded separately
-            if (src.includes('bootstrap')) continue;         // already on page
-            if (src.includes('font-awesome')) continue;      // already on page
+            if (src.includes('addin.js'))    continue;
+            if (src.includes('bootstrap'))   continue;
+            if (src.includes('font-awesome')) continue;
 
             await new Promise((resolve, reject) => {
                 if (script.src) {
-                    // For ALL scripts (including Firebase SDKs): if this exact URL is already
-                    // in the DOM, skip it. This prevents "already defined" warnings while still
-                    // loading service scripts (firestore, auth) that weren't loaded by a previous add-in.
-                    const normalizedSrc = script.src.split('?')[0]; // ignore cache-busting params
+                    const normalizedSrc = script.src.split('?')[0];
                     const alreadyLoaded = Array.from(document.querySelectorAll('script[src]'))
                         .some(s => s.src.split('?')[0] === normalizedSrc);
-                    if (alreadyLoaded) {
-                        resolve(); return;
-                    }
+                    if (alreadyLoaded) { resolve(); return; }
                     const el = document.createElement('script');
                     el.src = script.src;
                     el.onload = resolve;
@@ -239,9 +273,6 @@ geotab.addin.traxxisDashboard = function () {
                     document.head.appendChild(el);
                     injectedScripts.push(el);
                 } else if (script.textContent.trim()) {
-                    // Replace const/let declarations with var so that re-running the same
-                    // inline script (e.g. firebaseConfig) on a second add-in load doesn't
-                    // throw "Identifier already declared". var silently re-assigns instead.
                     const el = document.createElement('script');
                     el.textContent = script.textContent
                         .replace(/\bconst\s+/g, 'var ')
@@ -265,9 +296,9 @@ geotab.addin.traxxisDashboard = function () {
         const allowed = getAllowedAddins(currentDatabase);
         if (!allowed.includes(addinId)) return;
 
-        // Switch views
         document.getElementById('dashboardView').style.display = 'none';
-        document.getElementById('suiteHeader').style.display = 'none';
+        setHeaderAddin(addin);
+
         const addinView = document.getElementById('addinView');
         addinView.style.display = 'flex';
 
@@ -298,30 +329,29 @@ geotab.addin.traxxisDashboard = function () {
             hideAddinLoading();
             const container = document.getElementById('addinMountContainer');
             container.innerHTML = `
-                <div style="padding:2rem; text-align:center; color:#dc3545;">
-                    <i class="fas fa-exclamation-triangle" style="font-size:2rem; margin-bottom:1rem;"></i>
-                    <p style="font-weight:600;">Failed to load add-in</p>
-                    <p style="font-size:0.875rem; color:#6c757d;">${err.message}</p>
-                </div>
-            `;
+                <div class="error-state">
+                    <i class="fas fa-triangle-exclamation"></i>
+                    <p style="font-weight:600; color:#ff6b7a; margin-top:0.5rem;">Failed to load add-in</p>
+                    <p>${err.message}</p>
+                </div>`;
         }
     }
 
     // ── Go back to dashboard ───────────────────────────────────────────────────
 
     function goBack() {
-        cleanupActiveAddin(); // fire-and-forget is fine here; user is navigating away
-        document.getElementById('suiteHeader').style.display = '';
+        cleanupActiveAddin();
         document.getElementById('addinView').style.display = 'none';
         document.getElementById('dashboardView').style.display = 'block';
+        setHeaderDashboard();
     }
 
     // ── Render dashboard cards ─────────────────────────────────────────────────
 
     function renderDashboard(database) {
-        const grid = document.getElementById('addinsGrid');
+        const grid   = document.getElementById('addinsGrid');
         const banner = document.getElementById('accessDeniedBanner');
-        const msg = document.getElementById('accessDeniedMsg');
+        const msg    = document.getElementById('accessDeniedMsg');
         if (!grid) return;
 
         const allowed = getAllowedAddins(database);
@@ -333,40 +363,46 @@ geotab.addin.traxxisDashboard = function () {
             banner.style.display = 'none';
         }
 
-        grid.innerHTML = ADDIN_REGISTRY.map(addin => {
-            const hasAccess = allowed.includes(addin.id);
+        // Group by category
+        const categories = [...new Set(ADDIN_REGISTRY.map(a => a.category))];
+
+        grid.innerHTML = categories.map(cat => {
+            const addins = ADDIN_REGISTRY.filter(a => a.category === cat);
             return `
-                <div class="addin-card ${hasAccess ? 'addin-card--enabled' : 'addin-card--disabled'}">
-                    <div class="addin-card__icon-wrap">
-                        <i class="${addin.icon} addin-card__icon"></i>
+                <div class="category-group">
+                    <div class="category-label">${cat}</div>
+                    <div class="cards-grid">
+                        ${addins.map(addin => {
+                            const hasAccess = allowed.includes(addin.id);
+                            return `
+                                <div class="addin-card ${hasAccess ? 'addin-card--enabled' : 'addin-card--disabled'}">
+                                    <div class="addin-card__icon-wrap">
+                                        <i class="${addin.icon} addin-card__icon"></i>
+                                    </div>
+                                    <div class="addin-card__category">${addin.category}</div>
+                                    <h3 class="addin-card__name">${addin.name}</h3>
+                                    <p class="addin-card__desc">${addin.description}</p>
+                                    <div class="addin-card__footer">
+                                        ${hasAccess
+                                            ? `<button class="btn-launch" onclick="traxxisDashboard_launch('${addin.id}')">
+                                                   <i class="fas fa-arrow-right"></i> Open
+                                               </button>`
+                                            : `<div class="addin-card__locked">
+                                                   <i class="fas fa-lock"></i> Not Available
+                                               </div>`
+                                        }
+                                    </div>
+                                </div>`;
+                        }).join('')}
                     </div>
-                    <div class="addin-card__category">${addin.category}</div>
-                    <h3 class="addin-card__name">${addin.name}</h3>
-                    <p class="addin-card__desc">${addin.description}</p>
-                    <div class="addin-card__footer">
-                        ${hasAccess
-                            ? `<button class="btn-launch" onclick="traxxisDashboard_launch('${addin.id}')">
-                                    <i class="fas fa-arrow-right me-2"></i>Open
-                               </button>`
-                            : `<div class="addin-card__locked">
-                                    <i class="fas fa-lock me-2"></i>Not Available
-                               </div>`
-                        }
-                    </div>
-                </div>
-            `;
+                </div>`;
         }).join('');
     }
 
     // ── Global helpers (called from inline onclick) ────────────────────────────
 
-    window.traxxisDashboard_launch = function (addinId) {
-        launchAddin(addinId);
-    };
-
-    window.traxxisDashboard_back = function () {
-        goBack();
-    };
+    window.traxxisDashboard_launch = function (addinId) { launchAddin(addinId); };
+    window.traxxisDashboard_back   = function ()         { goBack(); };
 
     // ── Geotab lifecycle ───────────────────────────────────────────────────────
 
@@ -388,8 +424,7 @@ geotab.addin.traxxisDashboard = function () {
 
             api.getSession(function (session) {
                 currentDatabase = session.database;
-                const dbEl = document.getElementById('headerDatabaseName');
-                if (dbEl) dbEl.textContent = currentDatabase;
+                setHeaderDashboard();
                 renderDashboard(currentDatabase);
                 hideInitialLoading();
             });
@@ -398,7 +433,6 @@ geotab.addin.traxxisDashboard = function () {
         blur: function () {
             cleanupActiveAddin();
             if (elAddin) elAddin.style.display = 'none';
-            // Reset views for next focus
             document.getElementById('addinView').style.display = 'none';
             document.getElementById('dashboardView').style.display = 'block';
         }
