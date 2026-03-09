@@ -211,7 +211,48 @@ body {
 .addins-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-auto-rows: 1fr;
     gap: 1.5rem;
+}
+
+/* ── Filter Bubbles ── */
+.dashboard-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.filter-bubble {
+    padding: 0.35rem 1rem;
+    border-radius: 999px;
+    border: 2px solid rgba(12, 40, 83, 0.18);
+    background: white;
+    color: var(--primary-blue);
+    font-family: var(--font-main);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    white-space: nowrap;
+}
+
+.filter-bubble:hover {
+    border-color: var(--primary-orange);
+    color: var(--primary-orange);
+}
+
+.filter-bubble--active {
+    background: var(--primary-blue);
+    border-color: var(--primary-blue);
+    color: white;
+}
+
+.filter-bubble--active:hover {
+    background: var(--light-blue);
+    border-color: var(--light-blue);
+    color: white;
 }
 
 /* ── Add-in Card ── */
@@ -362,4 +403,5 @@ body {
     .suite-tab span { display: none; }
     .suite-tab { padding: 0 0.6rem; }
     .addins-grid { grid-template-columns: 1fr; }
+    .dashboard-filters { gap: 0.4rem; }
 }

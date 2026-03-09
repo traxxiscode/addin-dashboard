@@ -18,7 +18,7 @@
         <!-- Top bar -->
         <div class="suite-header__topbar">
             <div class="suite-header__left">
-                <button class="btn-back-circle" id="backBtn" onclick="traxxisDashboard_back()" style="display:none;" aria-label="Back to dashboard">
+                <button class="btn-back-circle" id="backBtn" onclick="traxxisDashboard_back()" style="visibility:hidden;" aria-label="Back to dashboard">
                     <i class="fas fa-arrow-left"></i>
                 </button>
                 <img src="https://cdn.baseline.is/static/content/logos/mDtvptChQ3XwBLuxuu5hip-lala.svg"
@@ -59,6 +59,7 @@
                 <i class="fas fa-exclamation-triangle me-2"></i>
                 <span id="accessDeniedMsg"></span>
             </div>
+            <div id="dashboardFilters" class="dashboard-filters"></div>
             <div id="addinsGrid" class="addins-grid"></div>
         </div>
     </div>

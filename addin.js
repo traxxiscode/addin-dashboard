@@ -11,6 +11,7 @@ geotab.addin.traxxisDashboard = function () {
     let injectedScripts = [];
     let activeAddin = null;
     let activeAddinId = null;
+    let activeFilter = 'All';
 
     // ── Add-in Registry ────────────────────────────────────────────────────────
     const ADDIN_REGISTRY = [
@@ -97,10 +98,25 @@ geotab.addin.traxxisDashboard = function () {
     // ── Database Access Control ────────────────────────────────────────────────
     const DATABASE_ACCESS = {
         'traxxisdemo': ['hos_alerter', 'device_manager', 'dvir_emailer', 'ruckit_assets', 'terminal_report_zone_manager', 'yard_move_zone_manager'],
-        'spartancarrier': ['hos_alerter'],
+        'spartancarrier': ['hos_alerter', 'device_manager'],
         'corriganoil': ['yard_move_zone_manager', 'dvir_emailer'],
         'gtithurman': ['ruckit_assets', 'yard_move_zone_manager'],
-        
+        'regendiesel': ['device_manager'],
+        'decimacorp': ['device_manager'],
+        'pavlovmedia': ['device_manager'],
+        'rnwbl': ['device_manager'],
+        'dataone': ['device_manager'],
+        'pumpman': ['device_manager'],
+        'erling_sales_and_service': ['device_manager'],
+        'cressydoor': ['device_manager'],
+        'bigcityleasing': ['device_manager'],
+        'foothillsconstruction': ['device_manager'],
+        'reynolds_fence': ['device_manager'],
+        'casttrans': ['device_manager'],
+        'jbltransport': ['device_manager'],
+        'howardsmechanical': ['device_manager'],
+        'hdxutility': ['device_manager'],
+        'vastrut': ['device_manager']
     };
 
     // ── Helpers ────────────────────────────────────────────────────────────────
@@ -133,12 +149,12 @@ geotab.addin.traxxisDashboard = function () {
 
     function showBackButton() {
         const btn = document.getElementById('backBtn');
-        if (btn) btn.style.display = 'flex';
+        if (btn) btn.style.visibility = 'visible';
     }
 
     function hideBackButton() {
         const btn = document.getElementById('backBtn');
-        if (btn) btn.style.display = 'none';
+        if (btn) btn.style.visibility = 'hidden';
     }
 
     // ── Header: tab strip ─────────────────────────────────────────────────────
@@ -381,6 +397,23 @@ geotab.addin.traxxisDashboard = function () {
         document.getElementById('dashboardView').style.display = 'block';
     }
 
+    // ── Render filter bubbles ──────────────────────────────────────────────────
+
+    function renderFilterBubbles(allowed) {
+        const container = document.getElementById('dashboardFilters');
+        if (!container) return;
+
+        const categories = ['All', ...Array.from(new Set(ADDIN_REGISTRY.map(a => a.category))).sort()];
+
+        container.innerHTML = categories.map(cat => `
+            <button
+                class="filter-bubble ${cat === activeFilter ? 'filter-bubble--active' : ''}"
+                onclick="traxxisDashboard_filter('${cat}')">
+                ${cat}
+            </button>
+        `).join('');
+    }
+
     // ── Render dashboard cards ─────────────────────────────────────────────────
 
     function renderDashboard(database) {
@@ -398,7 +431,20 @@ geotab.addin.traxxisDashboard = function () {
             banner.style.display = 'none';
         }
 
-        grid.innerHTML = ADDIN_REGISTRY.map(addin => {
+        renderFilterBubbles(allowed);
+
+        // Enabled first, then disabled — stable within each group
+        const sorted = [
+            ...ADDIN_REGISTRY.filter(a => allowed.includes(a.id)),
+            ...ADDIN_REGISTRY.filter(a => !allowed.includes(a.id))
+        ];
+
+        // Apply category filter
+        const filtered = activeFilter === 'All'
+            ? sorted
+            : sorted.filter(a => a.category === activeFilter);
+
+        grid.innerHTML = filtered.map(addin => {
             const hasAccess = allowed.includes(addin.id);
             return `
                 <div class="addin-card ${hasAccess ? 'addin-card--enabled' : 'addin-card--disabled'}">
@@ -424,6 +470,11 @@ geotab.addin.traxxisDashboard = function () {
     }
 
     // ── Global helpers (called from inline onclick) ────────────────────────────
+
+    window.traxxisDashboard_filter = function (category) {
+        activeFilter = category;
+        renderDashboard(currentDatabase);
+    };
 
     window.traxxisDashboard_launch = function (addinId) {
         const allowed = getAllowedAddins(currentDatabase);
