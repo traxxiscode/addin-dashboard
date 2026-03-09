@@ -97,6 +97,7 @@ geotab.addin.traxxisDashboard = function () {
     // ── Database Access Control ────────────────────────────────────────────────
     const DATABASE_ACCESS = {
         'traxxisdemo': ['hos_alerter', 'device_manager', 'dvir_emailer', 'ruckit_assets', 'terminal_report_zone_manager', 'yard_move_zone_manager'],
+        'spartancarrier': ['hos_alerter']
     };
 
     // ── Helpers ────────────────────────────────────────────────────────────────
