@@ -43,8 +43,8 @@ geotab.addin.traxxisDashboard = function () {
         },
         {
             id: 'dvir_emailer',
-            name: 'DVIR Emailer',
-            description: 'Automated DVIR email reports.',
+            name: 'DVIR Defect Emailer',
+            description: 'Automated DVIR defect notifications. Alerts recipients when new DVIR defects are reported, or existing defects are updated, with details on the defect and vehicle/driver information.',
             icon: 'fas fa-envelope',
             category: 'Compliance',
             geotabKey: 'dvirEmailer',
@@ -57,7 +57,7 @@ geotab.addin.traxxisDashboard = function () {
         {
             id: 'ruckit_assets',
             name: 'Ruckit Assets',
-            description: 'Manage and track your Ruckit assets.',
+            description: 'Manage and track your Ruckit assets in MyGeotab.',
             icon: 'fas fa-box',
             category: 'Asset Management',
             geotabKey: 'ruckitAssets',
@@ -70,7 +70,7 @@ geotab.addin.traxxisDashboard = function () {
         {
             id: 'terminal_report_zone_manager',
             name: 'Terminal Report Zone Manager',
-            description: 'Manage geofenced zones for terminal reporting.',
+            description: 'Manage zones for terminal reporting. Sends notifications when vehicles enter/exit geofenced terminal zones, and allows you to generate reports based on terminal activity.',
             icon: 'fas fa-map-marker-alt',
             category: 'Zone Management',
             geotabKey: 'terminalReportZones',
@@ -83,7 +83,7 @@ geotab.addin.traxxisDashboard = function () {
         {
             id: 'yard_move_zone_manager',
             name: 'Yard Move Zone Manager',
-            description: 'Manage geofenced zones for yard move detection.',
+            description: 'Manage zones for yard move detection. Annotates HOS logs with yard move status based on these zones.',
             icon: 'fas fa-map-marker-alt',
             category: 'Zone Management',
             geotabKey: 'yardMoveZones',
