@@ -115,7 +115,7 @@ geotab.addin.traxxisDashboard = function () {
         'casttrans': ['device_manager'],
         'jbltransport': ['device_manager'],
         'howardsmechanical': ['device_manager'],
-        'HDXutility': ['device_manager'],
+        'hdxutility': ['device_manager'],
         'vastrut': ['device_manager']
     };
 
@@ -511,7 +511,7 @@ geotab.addin.traxxisDashboard = function () {
             if (elAddin) elAddin.style.display = 'block';
 
             api.getSession(function (session) {
-                currentDatabase = session.database;
+                currentDatabase = session.database.toLowerCase();
                 renderDashboard(currentDatabase);
                 hideInitialLoading();
             });
