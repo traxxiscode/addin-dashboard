@@ -115,7 +115,7 @@ geotab.addin.traxxisDashboard = function () {
         'casttrans': ['device_manager'],
         'jbltransport': ['device_manager'],
         'howardsmechanical': ['device_manager'],
-        'hdxutility': ['device_manager'],
+        'HDXutility': ['device_manager'],
         'vastrut': ['device_manager']
     };
 
