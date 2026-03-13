@@ -92,13 +92,26 @@ geotab.addin.traxxisDashboard = function () {
             htmlUrl: 'https://traxxiscode.github.io/YMAnnotator-frontend/index.html',
             jsUrl:   'https://traxxiscode.github.io/YMAnnotator-frontend/addin.js',
             cssUrl:  'https://traxxiscode.github.io/YMAnnotator-frontend/addin.css'
+        },
+        {
+            id: 'driver_safety_scorecard',
+            name: 'Driver Safety Scorecard',
+            description: 'View safety scores for your drivers. Identify risky driving behaviors and trends to coach your drivers and improve fleet safety.',
+            icon: 'fas fa-user-shield',
+            category: 'Driver Management',
+            geotabKey: 'safetyscorecard',
+            rootElementId: 'safetyscorecard',
+            baseUrl: 'https://traxxiscode.github.io/driver-safety-scorecard/',
+            htmlUrl: 'https://traxxiscode.github.io/driver-safety-scorecard/index.html',
+            jsUrl:   'https://traxxiscode.github.io/driver-safety-scorecard/addin.js',
+            cssUrl:  'https://traxxiscode.github.io/driver-safety-scorecard/addin.css'
         }
     ];
 
     // ── Database Access Control ────────────────────────────────────────────────
     const DATABASE_ACCESS = {
-        'traxxisdemo': ['hos_alerter', 'device_manager', 'dvir_emailer', 'ruckit_assets', 'terminal_report_zone_manager', 'yard_move_zone_manager'],
-        'spartancarrier': ['hos_alerter', 'device_manager'],
+        'traxxisdemo': ['hos_alerter', 'device_manager', 'dvir_emailer', 'ruckit_assets', 'terminal_report_zone_manager', 'yard_move_zone_manager', 'driver_safety_scorecard'],
+        'spartancarrier': ['hos_alerter', 'device_manager', 'driver_safety_scorecard'],
         'corriganoil': ['yard_move_zone_manager', 'dvir_emailer'],
         'gtithurman': ['ruckit_assets', 'yard_move_zone_manager'],
         'regendiesel': ['device_manager'],
