@@ -105,12 +105,25 @@ geotab.addin.traxxisDashboard = function () {
             htmlUrl: 'https://traxxiscode.github.io/driver-safety-scorecard/index.html',
             jsUrl:   'https://traxxiscode.github.io/driver-safety-scorecard/addin.js',
             cssUrl:  'https://traxxiscode.github.io/driver-safety-scorecard/addin.css'
+        },
+        {
+            id: 'unidentified_driving',
+            name: 'Unidentified Driving',
+            description: 'View unidentified driving',
+            icon: 'fas fa-user-shield',
+            category: 'Driver Management',
+            geotabKey: 'unidentifieddriving',
+            rootElementId: 'unidentifieddriving',
+            baseUrl: 'https://traxxiscode.github.io/unidentified-driving/',
+            htmlUrl: 'https://traxxiscode.github.io/unidentified-driving/index.html',
+            jsUrl:   'https://traxxiscode.github.io/unidentified-driving/addin.js',
+            cssUrl:  'https://traxxiscode.github.io/unidentified-driving/addin.css'
         }
     ];
 
     // ── Database Access Control ────────────────────────────────────────────────
     const DATABASE_ACCESS = {
-        'traxxisdemo': ['hos_alerter', 'device_manager', 'dvir_emailer', 'ruckit_assets', 'terminal_report_zone_manager', 'yard_move_zone_manager', 'driver_safety_scorecard'],
+        'traxxisdemo': ['hos_alerter', 'device_manager', 'dvir_emailer', 'ruckit_assets', 'terminal_report_zone_manager', 'yard_move_zone_manager', 'driver_safety_scorecard', 'unidentified_driving'],
         'spartancarrier': ['hos_alerter', 'device_manager', 'driver_safety_scorecard'],
         'corriganoil': ['yard_move_zone_manager', 'dvir_emailer'],
         'gtithurman': ['ruckit_assets', 'yard_move_zone_manager'],
