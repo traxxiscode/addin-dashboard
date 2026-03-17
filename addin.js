@@ -118,12 +118,25 @@ geotab.addin.traxxisDashboard = function () {
             htmlUrl: 'https://traxxiscode.github.io/unidentified-driving/index.html',
             jsUrl:   'https://traxxiscode.github.io/unidentified-driving/addin.js',
             cssUrl:  'https://traxxiscode.github.io/unidentified-driving/addin.css'
+        },
+        {
+            id: 'fleet_dashboard',
+            name: 'Fleet Dashboard',
+            description: 'View key fleet metrics at a glance with customizable dashboards and reports.',
+            icon: 'fas fa-tachometer-alt',
+            category: 'Fleet Management',
+            geotabKey: 'fleetdashboard',
+            rootElementId: 'fleetdashboard',
+            baseUrl: 'https://traxxiscode.github.io/fleet-dashboard/',
+            htmlUrl: 'https://traxxiscode.github.io/fleet-dashboard/index.html',
+            jsUrl:   'https://traxxiscode.github.io/fleet-dashboard/addin.js',
+            cssUrl:  'https://traxxiscode.github.io/fleet-dashboard/addin.css'
         }
     ];
 
     // ── Database Access Control ────────────────────────────────────────────────
     const DATABASE_ACCESS = {
-        'traxxisdemo': ['hos_alerter', 'device_manager', 'dvir_emailer', 'ruckit_assets', 'terminal_report_zone_manager', 'yard_move_zone_manager', 'driver_safety_scorecard', 'unidentified_driving'],
+        'traxxisdemo': ['hos_alerter', 'device_manager', 'dvir_emailer', 'ruckit_assets', 'terminal_report_zone_manager', 'yard_move_zone_manager', 'driver_safety_scorecard', 'fleet_dashboard'],
         'spartancarrier': ['hos_alerter', 'device_manager', 'driver_safety_scorecard'],
         'corriganoil': ['yard_move_zone_manager', 'dvir_emailer'],
         'gtithurman': ['ruckit_assets', 'yard_move_zone_manager'],
