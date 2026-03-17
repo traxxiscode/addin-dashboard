@@ -136,7 +136,7 @@ geotab.addin.traxxisDashboard = function () {
 
     // ── Database Access Control ────────────────────────────────────────────────
     const DATABASE_ACCESS = {
-        'traxxisdemo': ['hos_alerter', 'device_manager', 'dvir_emailer', 'ruckit_assets', 'terminal_report_zone_manager', 'yard_move_zone_manager', 'driver_safety_scorecard', 'fleet_dashboard'],
+        'traxxisdemo': ['hos_alerter', 'device_manager', 'dvir_emailer', 'ruckit_assets', 'terminal_report_zone_manager', 'yard_move_zone_manager', 'driver_safety_scorecard', 'fleet_dashboard', 'unidentified_driving'],
         'spartancarrier': ['hos_alerter', 'device_manager', 'driver_safety_scorecard'],
         'corriganoil': ['yard_move_zone_manager', 'dvir_emailer', 'fleet_dashboard'],
         'gtithurman': ['ruckit_assets', 'yard_move_zone_manager'],
