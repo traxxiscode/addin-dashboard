@@ -155,7 +155,8 @@ geotab.addin.traxxisDashboard = function () {
         'jbltransport': ['device_manager'],
         'howardsmechanical': ['device_manager'],
         'hdxutility': ['device_manager'],
-        'vastrut': ['device_manager']
+        'vastrut': ['device_manager'],
+        'schillerhardware': ['device_manager']
     };
 
     // ── Helpers ────────────────────────────────────────────────────────────────
